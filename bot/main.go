@@ -19,18 +19,16 @@ var (
 	laps            int
 	globalchn       int
 )
-const (
-	MAXT  200
-	MEDT  100
-	MINT  0
 
+const (
+	MAXT = 200
+	MEDT = 100
+	MINT = 0
 )
 
 type cord struct {
 	x, y int
 }
-
-
 
 type controller struct {
 	p      *pod
@@ -54,6 +52,30 @@ type pod struct {
 type idon struct {
 	chn, xx, yy, tthrust int
 	fail, lock           bool
+}
+
+func (p *pod) debuginfo(t int) {
+	cx, cy := p.nextchp()
+
+	fmt.Fprintln(os.Stderr, "x y", p.x, p.y)
+	fmt.Fprintln(os.Stderr, "vx vy", p.x, p.y)
+	fmt.Fprintln(os.Stderr, "nextCheckPointId", p.nextCheckPointId)
+	fmt.Fprintln(os.Stderr, "boost", p.boost)
+	fmt.Fprintln(os.Stderr, "laps", p.laps)
+	fmt.Fprintln(os.Stderr, "rank", p.rank)
+	fmt.Fprintln(os.Stderr, "speed", p.speed())
+	fmt.Fprintln(os.Stderr, "actualacc", p.actualacc())
+	fmt.Fprintln(os.Stderr, "maxacce", p.maxacce(t))
+	fmt.Fprintln(os.Stderr, "diffspeedmax", p.difspeed(t))
+	fmt.Fprintln(os.Stderr, "distchp", p.distchp())
+	fmt.Fprintln(os.Stderr, "angle", p.angle)
+
+	fmt.Fprintln(os.Stderr, "checkpointangle", p.checkpointang(cx, cy))
+	fmt.Fprintln(os.Stderr, "vectorangle", p.vectorang())
+	fmt.Fprintln(os.Stderr, "frontchpdiff", p.checkpointang(cx, cy))
+
+	fmt.Fprintln(os.Stderr, "diffvectorangle", p.difangleppv())
+
 }
 
 func (p *pod) init(x, y, vx, vy, angle, nextCheckPointId int) {
@@ -87,6 +109,7 @@ func (p *pod) isturn(cx, cy int) bool {
 	return false
 
 }
+
 func (p *pod) nextchp() (int, int) {
 	x := cp[p.nextCheckPointId].x
 	y := cp[p.nextCheckPointId].y
@@ -105,6 +128,11 @@ func (p *pod) difspeed(t int) int {
 	m := p.maxacce(t)
 	df := m - s
 	return df
+}
+
+func (p *pod) actualacc() int {
+	d := p.speed() - p.pv.speed()
+	return d
 }
 
 func (p *pod) ranksum() int {
@@ -352,7 +380,6 @@ func (p pod) calchunt(op pod) (int, int) {
 	return rx, ry
 }
 
-
 func (p *pod) preturnchp() (int, int) {
 	i := nextring(p.nextCheckPointId)
 	cx, cy := cp[i].x, cp[i].y
@@ -383,7 +410,7 @@ func (p *pod) altredchp() (int, int) {
 }
 
 func main() {
-	
+
 	var p1, p2, op1, op2 pod
 	//var pred bool
 	p1.laps = 1
@@ -666,8 +693,6 @@ func main() {
 	}
 
 }
-
-
 
 func cpdistinit() {
 
@@ -1165,8 +1190,6 @@ func (p *pod) anglerand(c int) int {
 	return res
 }
 
-
-
 func (p *pod) blockn(op pod, nod idon) idon {
 	x, y, thrust := 0, 0, 0
 	lock := nod.lock
@@ -1325,8 +1348,6 @@ return idon {nextring(chn),x,y,thrust,fail,lock }
 
 }
 */
-
-
 
 func predict(p, op pod, step int) (int, int) {
 	pp := p
